@@ -1,0 +1,17 @@
+Num1 = float(input("Enter first number: "))
+Num2 = float(input("Enter second number: "))
+op = input("Enter operation (+, -, *, /): ")
+
+if op == "+":
+    print(Num1 + Num2)
+elif op == "-":
+    print(Num1 - Num2)
+elif op == "*":
+    print(Num1 * Num2)
+elif op == "/":
+    if Num2 == 0:
+        print("Error: division by zero")
+    else:
+        print(Num1 / Num2)
+else:
+    print("Unknown operation")
