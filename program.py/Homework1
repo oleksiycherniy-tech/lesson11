@@ -1,0 +1,65 @@
+import tkinter as tk
+
+habits = {}         
+history = []       
+
+def add_habit():
+    habit = entry.get()
+    if habit != "" and habit not in habits:
+        habits[habit] = 0
+        listbox.insert(tk.END, habit)
+        entry.delete(0, tk.END)
+
+def mark_done():
+    selected = listbox.curselection()
+    if selected:
+        habit = listbox.get(selected)
+        habits[habit] += 1
+        history.append(habit)
+        update_stats()
+        stats_label.config(fg="green")
+
+def delete_habit():
+    selected = listbox.curselection()
+    if selected:
+        habit = listbox.get(selected)
+        del habits[habit]
+        listbox.delete(selected)
+        update_stats()
+
+def update_stats():
+    text = "Статистика:\n"
+    for habit in habits:
+        text += f"{habit}: {habits[habit]}\n"
+
+    if habits:
+        popular = max(habits, key=habits.get)
+        text += f"\nНайпопулярніша: {popular}"
+
+    stats_label.config(text=text, fg="black")
+
+window = tk.Tk()
+window.title("Менеджер звичок")
+
+label = tk.Label(window, text="Нова звичка:")
+label.pack()
+
+entry = tk.Entry(window)
+entry.pack()
+
+add_button = tk.Button(window, text="Додати звичку", command=add_habit)
+add_button.pack()
+
+listbox = tk.Listbox(window)
+listbox.pack()
+
+done_button = tk.Button(window, text="Виконано", command=mark_done)
+done_button.pack()
+
+delete_button = tk.Button(window, text="Видалити звичку", command=delete_habit)
+delete_button.pack()
+
+stats_label = tk.Label(window, text="Статистика:")
+stats_label.pack()
+
+window.mainloop()
