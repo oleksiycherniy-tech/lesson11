@@ -1,0 +1,197 @@
+#include <iostream>
+#include <string>
+#include <cstdlib>
+#include <ctime>
+
+using namespace std;
+
+
+class Shop {
+public:
+    int buyerBalance;
+    int prices[3];
+    int stock[3];
+    bool bought[3];
+
+    Shop() {
+        buyerBalance = 1000;
+
+        prices[0] = 300;
+        prices[1] = 700;
+        prices[2] = 150;
+
+        for (int i = 0; i < 3; i++) {
+            stock[i] = 5;
+            bought[i] = false;
+        }
+    }
+
+    void showProducts() {
+        cout << "\nТовари:\n";
+        cout << "1 - Мишка (" << prices[0] << " грн | " << stock[0] << ")\n";
+        cout << "2 - Клавіатура (" << prices[1] << " грн | " << stock[1] << ")\n";
+        cout << "3 - Коврик (" << prices[2] << " грн | " << stock[2] << ")\n";
+        cout << "0 - Вийти\n";
+    }
+
+
+    void buy(int c) {
+        int i = c - 1;
+        if (c < 1 || c > 3) return;
+
+        if (buyerBalance >= prices[i] && stock[i] > 0) {
+            buyerBalance -= prices[i];
+            stock[i]--;
+            bought[i] = true;
+            cout << "Куплено\n";
+        } else {
+            cout << "Недостатньо коштів або товару немає\n";
+        }
+    }
+
+    void returnProduct(int c) {
+        int i = c - 1;
+        if (c < 1 || c > 3) return;
+
+        if (bought[i]) {
+            buyerBalance += prices[i];
+            stock[i]++;
+            bought[i] = false;
+            cout << "Повернено\n";
+        } else {
+            cout << "Ви не купували цей товар\n";
+        }
+    }
+
+
+    void sell(int c, int &sellerBalance) {
+        int i = c - 1;
+        if (c < 1 || c > 3) return;
+
+        if (stock[i] > 0) {
+            stock[i]--;
+            sellerBalance += prices[i];
+            cout << "Продано\n";
+        } else {
+            cout << "Товару немає\n";
+        }
+    }
+
+    void sellerReturn(int c, int &sellerBalance) {
+        int i = c - 1;
+        if (c < 1 || c > 3) return;
+
+        stock[i]++;
+        sellerBalance -= prices[i];
+        cout << "Товар повернули\n";
+    }
+
+
+    void watchCameras() {
+        int r = rand() % 3;
+
+        cout << "\n📹 Камери:\n";
+        if (r == 0) cout << "Все спокійно\n";
+        if (r == 1) cout << "Потрібно підійти до клієнта\n";
+        if (r == 2) cout << "Крадіжка!\n";
+    }
+};
+
+int main() {
+    srand(time(0));
+    Shop shop;
+
+    string password;
+    cout << "Введіть пароль (Enter = покупець): ";
+    getline(cin, password);
+
+    string role = "Покупець";
+
+    if (password == "admin123") role = "Адміністратор";
+    else if (password == "seller123") role = "Продавець";
+    else if (password == "guard123") role = "Охоронець";
+
+    cout << "\nВаша роль: " << role << "\n";
+
+    int choice;
+
+
+    if (role == "Адміністратор") {
+        string events[10];
+        int count = 0;
+
+        while (true) {
+            cout << "\n1 - Додати подію\n2 - Переглянути події\n0 - Вийти\n";
+            cin >> choice;
+
+            if (choice == 0) break;
+
+            if (choice == 1) {
+                cin.ignore();
+                cout << "Назва події: ";
+                getline(cin, events[count++]);
+                cout << "Подію додано\n";
+            }
+
+            if (choice == 2) {
+                cout << "\nПодії:\n";
+                for (int i = 0; i < count; i++)
+                    cout << i + 1 << " - " << events[i] << "\n";
+            }
+        }
+    }
+
+
+    else if (role == "Продавець") {
+        int sellerBalance = 0;
+
+        while (true) {
+            shop.showProducts();
+            cout << "Баланс продавця: " << sellerBalance << " грн\n";
+            cout << "1 - Продати\n2 - Прийняти повернення\n0 - Вийти\n";
+            cin >> choice;
+
+            if (choice == 0) break;
+
+            int p;
+            cout << "Оберіть товар: ";
+            cin >> p;
+
+            if (choice == 1) shop.sell(p, sellerBalance);
+            if (choice == 2) shop.sellerReturn(p, sellerBalance);
+        }
+    }
+
+
+    else if (role == "Охоронець") {
+        while (true) {
+            cout << "\n1 - Подивитись камери\n0 - Вийти\n";
+            cin >> choice;
+            if (choice == 0) break;
+            shop.watchCameras();
+        }
+    }
+
+
+    else {
+        while (true) {
+            shop.showProducts();
+            cout << "Баланс: " << shop.buyerBalance << " грн\n";
+            cout << "Оберіть товар: ";
+            cin >> choice;
+            if (choice == 0) break;
+            shop.buy(choice);
+        }
+
+        cout << "Повернути товар? (1 - так): ";
+        cin >> choice;
+        if (choice == 1) {
+            shop.showProducts();
+            cin >> choice;
+            shop.returnProduct(choice);
+        }
+    }
+
+    return 0;
+}
+
