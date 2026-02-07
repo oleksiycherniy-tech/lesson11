@@ -1,0 +1,175 @@
+#include <iostream>
+#include <fstream>
+#include <string>
+#include <list>
+#include <cstdlib>
+#include <ctime>
+
+using namespace std;
+
+
+struct Request {
+    int id;
+    string district;
+    string type;
+    int days;
+    bool critical;
+};
+
+
+list<Request> requests;
+
+
+void generateTestData() {
+    string districts[3] = {"Center", "West", "East"};
+    string types[3] = {"road", "light", "bench"};
+
+    srand(time(0));
+
+    for (int i = 1; i <= 10; i++) { 
+        Request r;
+        r.id = i;
+        r.district = districts[rand() % 3];
+        r.type = types[rand() % 3];
+        r.days = rand() % 7; 
+        r.critical = r.days >= 3;
+
+        requests.push_back(r);
+    }
+    cout << "Згенеровано тестові дані: " << requests.size() << " заявок\n";
+}
+
+
+void loadFromFile() {
+    string filename;
+    cout << "Введіть ім'я файлу: ";
+    cin >> filename;
+
+    ifstream file(filename);
+    if (!file) {
+        cout << "Файл не відкрився\n";
+        return;
+    }
+
+    requests.clear();
+
+    string line;
+    while (getline(file, line)) {
+        int p1 = line.find(';');
+        int p2 = line.find(';', p1 + 1);
+        int p3 = line.find(';', p2 + 1);
+
+        if (p1 == -1 || p2 == -1 || p3 == -1)
+            continue; 
+
+        try {
+            Request r;
+            r.id = stoi(line.substr(0, p1));
+            r.district = line.substr(p1 + 1, p2 - p1 - 1);
+            r.type = line.substr(p2 + 1, p3 - p2 - 1);
+            r.days = stoi(line.substr(p3 + 1));
+            r.critical = r.days >= 3;
+
+            requests.push_back(r);
+        } catch (...) {
+            continue; 
+        }
+    }
+
+    file.close();
+    cout << "Заявки зчитано: " << requests.size() << endl;
+}
+
+
+void showAll() {
+    if (requests.empty()) generateTestData();
+
+    for (auto r : requests) {
+        cout << "ID: " << r.id
+             << " | Район: " << r.district
+             << " | Тип: " << r.type
+             << " | Днів: " << r.days
+             << " | Критична: " << (r.critical ? "ТАК" : "НІ")
+             << endl;
+    }
+}
+
+
+void countCritical() {
+    if (requests.empty()) generateTestData();
+
+    int count = 0;
+    for (auto r : requests)
+        if (r.critical) count++;
+
+    cout << "Кількість критичних заявок: " << count << endl;
+}
+
+
+void averageDays() {
+    if (requests.empty()) generateTestData();
+
+    int sum = 0;
+    for (auto r : requests)
+        sum += r.days;
+
+    cout << "Середня кількість днів: " << (double)sum / requests.size() << endl;
+}
+
+
+void countByDistrict() {
+    if (requests.empty()) generateTestData();
+
+    string d;
+    cout << "Введіть район (Center / West / East): ";
+    cin >> d;
+
+    int count = 0;
+    for (auto r : requests)
+        if (r.district == d) count++;
+
+    cout << "Кількість заявок у районі: " << count << endl;
+}
+
+
+int main() {
+    int choice;
+
+    do {
+        cout << "\n--- City Repair Request System ---\n";
+        cout << "1. Завантажити з файлу\n";
+        cout << "2. Показати всі заявки\n";
+        cout << "3. Порахувати критичні заявки\n";
+        cout << "4. Середня кількість днів\n";
+        cout << "5. Заявки по району\n";
+        cout << "0. Вихід\n";
+        cout << "Ваш вибір: ";
+        cin >> choice;
+
+        switch (choice) {
+        case 1:
+            loadFromFile();
+            break;
+        case 2:
+            showAll();
+            break;
+        case 3:
+            countCritical();
+            break;
+        case 4:
+            averageDays();
+            break;
+        case 5:
+            countByDistrict();
+            break;
+        case 0:
+            cout << "Завершення роботи\n";
+            break;
+        default:
+            cout << "Невірний пункт меню\n";
+        }
+
+    } while (choice != 0);
+
+    return 0;
+}
